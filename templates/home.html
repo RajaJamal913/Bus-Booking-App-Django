@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ride Booking Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar-custom {
+            background-color: #0056b3;
+        }
+        .dashboard-header {
+            background-color: #f8f9fa;
+            padding: 30px 0;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            color: #343a40;
+        }
+        .image-container {
+            text-align: center;
+        }
+        .image-container img {
+            width: 100%; /* Extend the image to cover the full width */
+            max-height: 700px; /* Set maximum height */
+            height: auto; /* Maintain aspect ratio */
+            border-radius: 10px; /* Optional: Add some border radius for a smooth edge */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for depth */
+        }
+        .card-booking {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .booking-section {
+            margin-top: 40px;
+            background-color: #e9ecef; /* Changed the background color */
+            padding: 40px; /* Added padding for better spacing */
+            border-radius: 10px; /* Added border radius for a smoother look */
+        }
+        .btn-primary {
+            background-color: #0056b3; /* Changed button color */
+            border: none; /* Removed border */
+        }
+        .btn-primary:hover {
+            background-color: #004494; /* Darker shade on hover */
+        }
+        .form-label {
+            font-weight: bold;
+            color: #495057; /* Changed label color */
+        }
+        /* New styles for info boxes */
+        .info-box {
+            background-color: #495057; /* Lightened grey for box */
+            color: #ffffff; /* White text */
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+        
+        .info-box:hover {
+            transform: scale(1.05); /* Scale up on hover */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
+        }
+        .knowledge-section {
+            background-color: #343a40; /* Dark grey background */
+            color: white; /* White text */
+            padding: 2rem 0; /* Add padding for top and bottom */
+            margin: 0; /* Remove default margins */
+        }
+        
+    </style>
+    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Bus Ride Booking</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'dashboard' %}">Dashboard</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">My Rides</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#">Profile</a>
+    </li>
+    <li class="nav-item">
+        <form action="{% url 'logout' %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="nav-link btn btn-link">Logout</button>
+        </form>
+    </li>
+{% else %}
+    <li class="nav-item">
+        <a class="btn btn-outline-light me-2" href="{% url 'register' %}">Register</a>
+    </li>
+    <li class="nav-item">
+        <a class="btn btn-light" href="{% url 'login' %}">Login</a>
+    </li>
+{% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    
+    <script>
+        // Simulated user authentication state
+        let isLoggedIn = false; // Change this to true when the user logs in
+    
+        // Function to update the navbar based on user authentication state
+        function updateNavbar() {
+            if (isLoggedIn) {
+                document.getElementById('dashboardNav').style.display = 'block';
+                document.getElementById('myRidesNav').style.display = 'block';
+                document.getElementById('profileNav').style.display = 'block';
+                document.getElementById('logoutNav').style.display = 'block';
+                document.getElementById('registerNav').style.display = 'none';
+                document.getElementById('loginNav').style.display = 'none';
+            } else {
+                document.getElementById('dashboardNav').style.display = 'none';
+                document.getElementById('myRidesNav').style.display = 'none';
+                document.getElementById('profileNav').style.display = 'none';
+                document.getElementById('logoutNav').style.display = 'none';
+                document.getElementById('registerNav').style.display = 'block';
+                document.getElementById('loginNav').style.display = 'block';
+            }
+        }
+    
+        // Call updateNavbar on page load
+        updateNavbar();
+    </script>
+    
+
+    <!-- Dashboard Header -->
+    <section class="dashboard-header" style="background-color: #343a40; padding: 40px 0;">
+        <div class="container">
+            <h1 style="color: #ffffff;">Welcome to the Faisal Movers Dashboard</h1>
+            <p class="lead" style="color: #e9ecef;">Book a ride, view upcoming trips, and manage your bookings.</p>
+        </div>
+    </section>
+
+    <!-- Image Section -->
+    <section class="image-container">
+        <div class="container-fluid p-0">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDlWKzv_3tqzzdV2hJxTsRD4wSohli526KuA&s" alt="Bus Ride Image">
+        </div>
+    </section>
+
+    <section class="booking-section" style="background-color: #212529; padding: 40px;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow border-0 rounded-4" style="background-color: #343a40;">
+                        <div class="card-body p-5">
+                            <h4 class="card-title text-center mb-4" style="font-family: 'Arial', sans-serif; color: #ffffff;">Book Your Bus Ride</h4>
+                            <p class="text-center text-muted mb-4" style="font-size: 1.1rem; color: #e9ecef;">Choose your route and schedule below</p>
+                            <form method="post" action="{% url 'book_ride' %}" style="background-color: #495057; padding: 20px; border-radius: 5px;">
+                                {% csrf_token %}
+                                <div class="mb-4">
+                                    <label for="pickup" class="form-label" style="color: #ffffff;">Pickup Location</label>
+                                    <select class="form-select" id="pickup" name="pickup" required>
+                                        <option value="" disabled selected>Select your pickup location</option>
+                                        <option value="Islamabad">Islamabad</option>
+                                        <option value="Karachi">Karachi</option>
+                                        <option value="Peshawar">Peshawar</option>
+                                        <option value="Lahore">Lahore</option>
+                                        <option value="Quetta">Quetta</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="destination" class="form-label" style="color: #ffffff;">Destination</label>
+                                    <select class="form-select" id="destination" name="destination" required>
+                                        <option value="" disabled selected>Select your destination</option>
+                                        <option value="Islamabad">Islamabad</option>
+                                        <option value="Karachi">Karachi</option>
+                                        <option value="Peshawar">Peshawar</option>
+                                        <option value="Lahore">Lahore</option>
+                                        <option value="Quetta">Quetta</option>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="fare" class="form-label" style="color: #ffffff;">Fare</label>
+                                    <input type="text" class="form-control" id="fare" name="fare" placeholder="Fare" readonly style="background-color: #e9ecef; font-weight: bold;">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="date" class="form-label" style="color: #ffffff;">Ride Date</label>
+                                    <input type="date" class="form-control" id="date" name="date" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="time" class="form-label" style="color: #ffffff;">Ride Time</label>
+                                    <select class="form-select" id="time" name="time" required>
+                                        <option value="" disabled selected>Select a ride time</option>
+                                        <!-- Options for ride time will be populated based on the selected route -->
+                                    </select>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">Book Ride</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        const fareMap = {
+            'Islamabad-Karachi': 5000,
+            'Islamabad-Peshawar': 1500,
+            'Islamabad-Lahore': 3000,
+            'Islamabad-Quetta': 6000,
+            'Karachi-Islamabad': 5000,
+            'Karachi-Peshawar': 7000,
+            'Karachi-Lahore': 3500,
+            'Karachi-Quetta': 4000,
+            'Peshawar-Islamabad': 1500,
+            'Peshawar-Karachi': 7000,
+            'Peshawar-Lahore': 3000,
+            'Peshawar-Quetta': 8000,
+            'Lahore-Islamabad': 3000,
+            'Lahore-Karachi': 3500,
+            'Lahore-Peshawar': 3000,
+            'Lahore-Quetta': 5000,
+            'Quetta-Islamabad': 6000,
+            'Quetta-Karachi': 4000,
+            'Quetta-Peshawar': 8000,
+            'Quetta-Lahore': 5000
+        };
+    
+        const rideTimesMap = {
+            'Islamabad-Karachi': ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM'],
+            'Islamabad-Peshawar': ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+            'Islamabad-Lahore': ['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM'],
+            'Islamabad-Quetta': ['06:00 AM', '08:00 AM', '10:00 AM', '12:00 PM'],
+            'Karachi-Islamabad': ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM'],
+            'Karachi-Peshawar': ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+            'Karachi-Lahore': ['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM'],
+            'Karachi-Quetta': ['06:00 AM', '08:00 AM', '10:00 AM', '12:00 PM'],
+            'Peshawar-Islamabad': ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+            'Peshawar-Karachi': ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM'],
+            'Peshawar-Lahore': ['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM'],
+            'Peshawar-Quetta': ['06:00 AM', '08:00 AM', '10:00 AM', '12:00 PM'],
+            'Lahore-Islamabad': ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM'],
+            'Lahore-Karachi': ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+            'Lahore-Peshawar': ['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM'],
+            'Lahore-Quetta': ['06:00 AM', '08:00 AM', '10:00 AM', '12:00 PM'],
+            'Quetta-Islamabad': ['08:00 AM', '10:00 AM', '12:00 PM', '02:00 PM'],
+            'Quetta-Karachi': ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM'],
+            'Quetta-Peshawar': ['07:00 AM', '09:00 AM', '11:00 AM', '01:00 PM'],
+            'Quetta-Lahore': ['06:00 AM', '08:00 AM', '10:00 AM', '12:00 PM']
+        };
+    
+        // Helper function to convert 12-hour format to 24-hour format
+        function convertTo24Hour(time12) {
+            const [time, modifier] = time12.split(" ");
+            let [hours, minutes] = time.split(":");
+    
+            if (modifier === "PM" && hours !== "12") {
+                hours = parseInt(hours, 10) + 12;
+            }
+            if (modifier === "AM" && hours === "12") {
+                hours = "00";
+            }
+    
+            return `${hours}:${minutes}`;
+        }
+    
+        document.getElementById('pickup').addEventListener('change', updateFareAndTimes);
+        document.getElementById('destination').addEventListener('change', updateFareAndTimes);
+    
+        function updateFareAndTimes() {
+            const pickup = document.getElementById('pickup').value;
+            const destination = document.getElementById('destination').value;
+    
+            if (pickup && destination) {
+                const route = `${pickup}-${destination}`;
+                const fare = fareMap[route] || 'Fare not available';
+                document.getElementById('fare').value = fare;
+    
+                // Update ride times
+                const timeSelect = document.getElementById('time');
+                timeSelect.innerHTML = ''; // Clear existing options
+                if (rideTimesMap[route]) {
+                    rideTimesMap[route].forEach(time => {
+                        const option = document.createElement('option');
+                        option.value = convertTo24Hour(time); // Convert to 24-hour format for value
+                        option.textContent = time; // Keep the original format for display
+                        timeSelect.appendChild(option);
+                    });
+                } else {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'No available ride times';
+                    timeSelect.appendChild(defaultOption);
+                }
+            } else {
+                document.getElementById('fare').value = '';
+                const timeSelect = document.getElementById('time');
+                timeSelect.innerHTML = '<option value="" disabled selected>Select a ride time</option>'; // Reset
+            }
+        }
+    </script>
+    
+    
+    <!-- Knowledge Section -->
+<!-- Knowledge Section -->
+<section class="container-fluid my-5 knowledge-section"> <!-- Changed to container-fluid -->
+    <h2 class="text-center mb-4">Travel Knowledge</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Travel Distance</h5>
+                <p>From Islamabad to Karachi, the distance is approximately 1,400 km.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Travel Time</h5>
+                <p>The average travel time by bus from Lahore to Islamabad is around 18 hours.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Bus Facilities</h5>
+                <p>Enjoy free Wi-Fi, refreshments, and comfortable seating on our buses.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Safety Tips</h5>
+                <p>Always keep your belongings close and report any suspicious activity.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Booking Tips</h5>
+                <p>Book your ride in advance to secure the best prices and seats.</p>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="info-box">
+                <h5>Travel Regulations</h5>
+                <p>Check for any travel restrictions or guidelines before your journey.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
